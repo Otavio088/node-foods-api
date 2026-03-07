@@ -1,0 +1,25 @@
+{
+  "name": "order-and-delivery-api",
+  "version": "1.0.0",
+  "description": "api to orders and deliveries of a restaurant",
+  "homepage": "https://github.com/Otavio088/restaurant-node-api#readme",
+  "bugs": {
+    "url": "https://github.com/Otavio088/restaurant-node-api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Otavio088/restaurant-node-api.git"
+  },
+  "license": "ISC",
+  "author": "Otávio Augusto de Melo Ribeiro",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "knex": "^3.1.0",
+    "mysql2": "^3.19.0"
+  }
+}
