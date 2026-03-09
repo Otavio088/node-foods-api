@@ -14,9 +14,25 @@ const getAll = async () => {
         message: 'Tipos de Usuário encontrados com sucesso!',
         data: data
     }
+}
 
+const create = async (body) => {
+    const roleName = body.name.trim();
+    const bodyFormatted = {
+        name: roleName,
+        type: roleName.toLowerCase().replace(' ', '_'),
+        modules_ids: body.modules_ids
+    }
+
+    const data = await rolesUserRepository.create(bodyFormatted);
+
+    return {
+        message: 'Tipo de Usuário criado com sucesso!',
+        data: data
+    }
 }
 
 module.exports = {
-    getAll
+    getAll,
+    create
 }

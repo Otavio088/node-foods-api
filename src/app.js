@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = require('./routes/index');
+require('./database/index'); // Executa a conexão via knex e faz atribuição no objectionjs
 
 const app = express();
 
