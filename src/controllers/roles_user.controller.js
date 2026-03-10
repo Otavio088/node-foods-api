@@ -10,14 +10,31 @@ const getAll = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            // message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde',
             message: err.message,
             data: []
         });
     }
 }
 
-const create = async (req, res, next) => {
+const getById = async (req, res) => {
+    try {
+        const roleId = req.params.id;
+
+        const result = await rolesUserService.getById(roleId);
+
+        return res.status(200).send({
+            message: result.message,
+            data: result.data
+        });
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+            data: {}
+        });
+    }
+}
+
+const create = async (req, res) => {
     try {
         const body = req.body;
 
@@ -30,12 +47,50 @@ const create = async (req, res, next) => {
     } catch (err) {
         return res.status(500).send({
             message: err.message,
-            data: []
+            data: {}
+        });
+    }
+}
+
+const update = async (req, res) => {
+    try {
+        const body = req.body;
+        const params = req.params;
+
+        const result = await rolesUserService.update(body, params.id);
+
+        return res.status(201).send({
+            message: result.message,
+            data: result.data
+        })
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+            data: {}
+        });
+    }
+}
+
+const remove = async (req, res) => {
+    try {
+        const roleId = req.params.id;
+
+        const result = await rolesUserService.remove(roleId);
+
+        return res.status(201).send({
+            message: result.message
+        })
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message
         });
     }
 }
 
 module.exports = {
     getAll,
-    create
+    getById,
+    create,
+    update,
+    remove
 }

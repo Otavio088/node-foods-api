@@ -16,6 +16,15 @@ const getAll = async () => {
     }
 }
 
+const getById = async (roleId) => {
+    const data = await rolesUserRepository.getById(roleId);
+
+    return {
+        message: 'Tipo de Usuário encontrado com sucesso!',
+        data: data
+    }
+}
+
 const create = async (body) => {
     const roleName = body.name.trim();
     const bodyFormatted = {
@@ -27,12 +36,39 @@ const create = async (body) => {
     const data = await rolesUserRepository.create(bodyFormatted);
 
     return {
-        message: 'Tipo de Usuário criado com sucesso!',
+        message: 'Tipo de Usuário cadastrado com sucesso!',
         data: data
+    }
+}
+
+const update = async (body, roleId) => {
+    const roleName = body.name ? body.name.trim() : '';
+    const bodyFormatted = {
+        name: roleName,
+        type: roleName ? roleName.toLowerCase().replace(' ', '_') : '',
+        modules_ids: body.modules_ids ? body.modules_ids : []
+    }
+
+    const data = await rolesUserRepository.update(bodyFormatted, roleId);
+
+    return {
+        message: 'Tipo de Usuário atualizado com sucesso!',
+        data: data
+    }
+}
+
+const remove = async (roleId) => {
+    await rolesUserRepository.remove(roleId);
+
+    return {
+        message: 'Tipo de Usuário excluído com sucesso!'
     }
 }
 
 module.exports = {
     getAll,
-    create
+    getById,
+    create,
+    update,
+    remove
 }
