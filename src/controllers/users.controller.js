@@ -16,6 +16,43 @@ const getAll = async (req, res) => {
     }
 }
 
+const getById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const result = await usersService.getById(userId);
+
+        return res.status(200).send({
+            message: result.message,
+            data: result.data
+        });
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+            data: {}
+        });
+    }
+}
+
+const getByLogin = async (req, res) => {
+    try {
+        const password = req.params.password;
+        const email = req.params.email;
+
+        const result = await usersService.getByLogin(password, email);
+
+        return res.status(200).send({
+            message: result.message,
+            data: result.data
+        });
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+            data: {}
+        });
+    }
+}
+
 const create = async (req, res) => {
     try {
         const body = req.body;
@@ -34,7 +71,46 @@ const create = async (req, res) => {
     }
 }
 
+const update = async (req, res) => {
+    try {
+        const body = req.body;
+        const params = req.params;
+
+        const result = await usersService.update(body, params.id);
+
+        return res.status(201).send({
+            message: result.message,
+            data: result.data
+        })
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message,
+            data: {}
+        });
+    }
+}
+
+const remove = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const result = await usersService.remove(userId);
+
+        return res.status(200).send({
+            message: result.message
+        });
+    } catch (err) {
+        return res.status(500).send({
+            message: err.message
+        });
+    }
+}
+
 module.exports = {
     getAll,
-    create
+    getById,
+    getByLogin,
+    create,
+    update,
+    remove
 }

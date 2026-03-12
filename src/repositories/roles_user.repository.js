@@ -33,7 +33,7 @@ const create = async (body) => {
 
     let role;
     await Roles.transaction(async trx => {
-        role = await Roles.query()
+        role = await Roles.query(trx)
             .insert({
                 name: body.name,
                 type: body.type
@@ -90,14 +90,14 @@ const update = async (body, roleId) => {
     }
 
     await Roles.transaction(async trx => {
-        await Roles.query()
+        await Roles.query(trx)
             .patch({
                 name: body.name ? body.name : role.name,
                 type: body.type ? body.type : role.type
             })
             .where('id', roleId);
 
-        const modulesRoleExists = await ModulesRole.query()
+        const modulesRoleExists = await ModulesRole.query(trx)
             .where('role_id', role.id);
 
         const modulesRoleExistsMap = new Map();
@@ -128,7 +128,7 @@ const update = async (body, roleId) => {
         }
 
         if (modulesRoleToDelete.length > 0) {
-            await ModulesRole.query()
+            await ModulesRole.query(trx)
                 .delete()
                 .whereIn('id', modulesRoleToDelete);
         }
@@ -145,9 +145,7 @@ const update = async (body, roleId) => {
 const remove = async (roleId) => {
     const existRole = await Roles.query()
         .select('id')
-        .findOne({
-            id: roleId
-        });
+        .findById(roleId);
 
     if (!existRole)
         throw new Error('Tipo de Usuário inexistente!');

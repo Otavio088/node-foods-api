@@ -26,12 +26,7 @@ const getById = async (roleId) => {
 }
 
 const create = async (body) => {
-    const roleName = body.name.trim();
-    const bodyFormatted = {
-        name: roleName,
-        type: roleName.toLowerCase().replace(' ', '_'),
-        modules_ids: body.modules_ids
-    }
+    const bodyFormatted = formatBody(body);
 
     const data = await rolesUserRepository.create(bodyFormatted);
 
@@ -42,12 +37,7 @@ const create = async (body) => {
 }
 
 const update = async (body, roleId) => {
-    const roleName = body.name ? body.name.trim() : '';
-    const bodyFormatted = {
-        name: roleName,
-        type: roleName ? roleName.toLowerCase().replace(' ', '_') : '',
-        modules_ids: body.modules_ids ? body.modules_ids : []
-    }
+    const bodyFormatted = formatBody(body);
 
     const data = await rolesUserRepository.update(bodyFormatted, roleId);
 
@@ -63,6 +53,17 @@ const remove = async (roleId) => {
     return {
         message: 'Tipo de Usuário excluído com sucesso!'
     }
+}
+
+function formatBody (body) {
+    const roleName = body.name ? body.name.trim() : '';
+    const bodyFormatted = {
+        name: roleName,
+        type: roleName ? roleName.toLowerCase().replace(' ', '_') : '',
+        modules_ids: body.modules_ids ? body.modules_ids : []
+    }
+
+    return bodyFormatted;
 }
 
 module.exports = {

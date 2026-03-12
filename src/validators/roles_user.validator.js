@@ -8,10 +8,10 @@ const create = async (req, res, next) => {
         return res.status(400).send({ message: 'Nome do Tipo de Usuário é obrigatório!', field: 'name', data: {} });
 
     if (!body.modules_ids || !Array.isArray(body.modules_ids))
-        return res.status(400).send({ message: 'IDs dos Módulos do Sistema são obrigatórios e deve ser um array!', field: 'modules_ids', data: {} });
+        return res.status(400).send({ message: 'Módulos do Sistema são obrigatórios e deve ser um array!', field: 'modules_ids', data: {} });
 
     if (body.modules_ids.length === 0)
-        return res.status(400).send({ message: 'IDs dos Módulos do Sistema está vazio!', field: 'modules_ids', data: {} });
+        return res.status(400).send({ message: 'Módulos do Sistema são obrigatórios!!', field: 'modules_ids', data: {} });
 
     return next();
 }
