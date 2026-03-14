@@ -23,30 +23,6 @@ const getById = async (userId) => {
     return user;
 }
 
-const getByLogin = async (password, email) => {
-    const user = await Users.query()
-        .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
-        .findOne({
-            email: email.trim(),
-            deleted_at: null
-        })
-        .withGraphFetched('roles.modules');
-
-
-    if (!user)
-        throw new Error('E-mail de Usuário inexistente!');
-
-    const bcrypt = require('bcrypt');
-
-    const matchPassword = await bcrypt.compare(password, user.password);
-
-    if (!matchPassword)
-        throw new Error('Senha incorreta!');
-    
-
-    return user;
-}
-
 const create = async (body) => {
     const existUser = await Users.query()
         .select('id')
@@ -83,6 +59,30 @@ const create = async (body) => {
         .withGraphFetched('roles.modules');
 
     return newUser;
+}
+
+const loginUser = async (password, email) => {
+    const user = await Users.query()
+        .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
+        .findOne({
+            email: email.trim(),
+            deleted_at: null
+        })
+        .withGraphFetched('roles.modules');
+
+
+    if (!user)
+        throw new Error('E-mail de Usuário inexistente!');
+
+    const bcrypt = require('bcrypt');
+
+    const matchPassword = await bcrypt.compare(password, user.password);
+
+    if (!matchPassword)
+        throw new Error('Senha incorreta!');
+    
+
+    return user;
 }
 
 const update = async (body, userId) => {
@@ -196,7 +196,7 @@ const remove = async (userId) => {
 module.exports = {
     getAll,
     getById,
-    getByLogin,
+    loginUser,
     create,
     update,
     remove

@@ -28,16 +28,6 @@ const getById = async (userId) => {
 
 }
 
-const getByLogin = async (password, email) => {
-    const data = await usersRepository.getByLogin(password, email);
-
-    return {
-        message: 'Seja bem-vindo!',
-        data: data
-    }
-
-}
-
 const create = async (body) => {
     const bodyFormatted = await formatBody(body);
 
@@ -47,6 +37,18 @@ const create = async (body) => {
         message: 'Usuário criado com sucesso!',
         data: data
     }
+}
+
+const loginUser = async (body) => {
+    const password = body.password;
+    const email = body.email;
+    const data = await usersRepository.loginUser(password, email);
+
+    return {
+        message: 'Seja bem-vindo!',
+        data: data
+    }
+
 }
 
 const update = async (body, roleId) => {
@@ -87,7 +89,7 @@ const formatBody = async (body) => {
 module.exports = {
     getAll,
     getById,
-    getByLogin,
+    loginUser,
     create,
     update,
     remove

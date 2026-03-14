@@ -34,12 +34,11 @@ const getById = async (req, res) => {
     }
 }
 
-const getByLogin = async (req, res) => {
+const create = async (req, res) => {
     try {
-        const password = req.params.password;
-        const email = req.params.email;
+        const body = req.body;
 
-        const result = await usersService.getByLogin(password, email);
+        const result = await usersService.create(body);
 
         return res.status(200).send({
             message: result.message,
@@ -53,11 +52,11 @@ const getByLogin = async (req, res) => {
     }
 }
 
-const create = async (req, res) => {
+const loginUser = async (req, res) => {
     try {
         const body = req.body;
 
-        const result = await usersService.create(body);
+        const result = await usersService.loginUser(body);
 
         return res.status(200).send({
             message: result.message,
@@ -109,7 +108,7 @@ const remove = async (req, res) => {
 module.exports = {
     getAll,
     getById,
-    getByLogin,
+    loginUser,
     create,
     update,
     remove

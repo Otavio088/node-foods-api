@@ -17,10 +17,10 @@ const create = async (req, res, next) => {
         return res.status(400).send({ message: 'E-mail de Usuário é obrigatório!', field: 'email', data: {} });
 
     if (!body.password)
-        return res.status(400).send({ message: 'Senha do Usuário é obrigatório!', field: 'password', data: {} });
+        return res.status(400).send({ message: 'Senha do Usuário é obrigatória!', field: 'password', data: {} });
 
     if (!body.password_confirm)
-        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatório!', field: 'password_confirm', data: {} });
+        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatória!', field: 'password_confirm', data: {} });
 
     if (String(body.password) !== String(body.password_confirm))
         return res.status(400).send({ message: 'Senha e Confirmação de Senha devem ser iguais!', field: 'password, password_confirm', data: {} });
@@ -47,10 +47,10 @@ const update = async (req, res, next) => {
         return res.status(400).send({ message: 'E-mail de Usuário é obrigatório para atualização!', field: 'email', data: {} });
 
     if (!body.password)
-        return res.status(400).send({ message: 'Senha do Usuário é obrigatório para atualização!', field: 'password', data: {} });
+        return res.status(400).send({ message: 'Senha do Usuário é obrigatória para atualização!', field: 'password', data: {} });
 
     if (!body.password_confirm)
-        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatório para atualização!', field: 'password_confirm', data: {} });
+        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatória para atualização!', field: 'password_confirm', data: {} });
 
     if (String(body.password) !== String(body.password_confirm))
         return res.status(400).send({ message: 'Senha e Confirmação de Senha devem ser iguais!', field: 'password, password_confirm', data: {} });
@@ -58,7 +58,23 @@ const update = async (req, res, next) => {
     return next();
 }
 
+const login = async (req, res, next) => {
+    const body = req.body;
+
+    if (!body || Object.keys(body).length === 0)
+        return res.status(400).send({ message: 'Nenhum dado foi enviado para a login de Usuário!', data: {} });
+
+    if (!body.email)
+        return res.status(400).send({ message: 'E-mail de Usuário é obrigatório!', field: 'email', data: {} });
+
+    if (!body.password)
+        return res.status(400).send({ message: 'Senha do Usuário é obrigatória!', field: 'password', data: {} });
+
+    return next();
+}
+
 module.exports = {
     create,
-    update
+    update,
+    login
 }

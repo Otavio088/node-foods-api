@@ -6,8 +6,8 @@ const usersController = require('../controllers/users.controller');
 
 router.get('/', usersController.getAll)
 router.get('/:id', usersController.getById)
-router.get('/login/:password/:email', usersController.getByLogin);
 router.post('/', usersValidators.create, usersController.create);
+router.post('/login', usersValidators.login, usersController.loginUser);
 router.put('/:id', usersValidators.update, usersController.update);
 router.delete('/:id', usersController.remove);
 
