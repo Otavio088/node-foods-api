@@ -19,7 +19,7 @@ const login = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
+            message: err.message,
             data: {}
         });
     }
