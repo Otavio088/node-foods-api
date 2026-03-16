@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: []
         });
     }
@@ -28,7 +28,7 @@ const getById = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -46,25 +46,7 @@ const create = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
-    }
-}
-
-const loginUser = async (req, res) => {
-    try {
-        const body = req.body;
-
-        const result = await usersService.loginUser(body);
-
-        return res.status(200).send({
-            message: result.message,
-            data: result.data
-        });
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -83,7 +65,7 @@ const update = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -100,7 +82,7 @@ const remove = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
         });
     }
 }
@@ -108,7 +90,6 @@ const remove = async (req, res) => {
 module.exports = {
     getAll,
     getById,
-    loginUser,
     create,
     update,
     remove

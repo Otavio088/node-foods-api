@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: []
         });
     }
@@ -28,7 +28,7 @@ const getById = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -46,7 +46,7 @@ const create = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -65,7 +65,7 @@ const update = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).send({
-            message: err.message,
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
             data: {}
         });
     }
@@ -82,7 +82,7 @@ const remove = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).send({
-            message: err.message
+            message: 'Desculpe, ocorreu algum erro desconhecido. Tente novamente mais tarde.',
         });
     }
 }

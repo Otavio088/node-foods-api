@@ -1,5 +1,4 @@
 const usersRepository = require('../repositories/users.repository');
-const bcrypt = require('bcrypt');
 
 const getAll = async () => {
     const data = await usersRepository.getAll();
@@ -39,18 +38,6 @@ const create = async (body) => {
     }
 }
 
-const loginUser = async (body) => {
-    const password = body.password;
-    const email = body.email;
-    const data = await usersRepository.loginUser(password, email);
-
-    return {
-        message: 'Seja bem-vindo!',
-        data: data
-    }
-
-}
-
 const update = async (body, roleId) => {
     const bodyFormatted = await formatBody(body);
 
@@ -72,6 +59,8 @@ const remove = async (userId) => {
 }
 
 const formatBody = async (body) => {
+    const bcrypt = require('bcrypt');
+
     const salt = await bcrypt.genSalt();
     const password = String(body.password).trim();
 
@@ -89,7 +78,6 @@ const formatBody = async (body) => {
 module.exports = {
     getAll,
     getById,
-    loginUser,
     create,
     update,
     remove
