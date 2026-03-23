@@ -28,7 +28,8 @@ const create = async (body) => {
         .select('id')
         .findOne({
             email: body.email
-        });
+        })
+        .whereNull('deleted_at');
 
     if (existUser)
         throw new Error('Já existe um Usuário com este e-mail!');
