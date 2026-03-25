@@ -68,11 +68,17 @@ const formatBody = async (body) => {
         name: body.name ? String(body.name).trim() : '',
         roles_ids: body.roles_ids,
         email: body.email ? String(body.email).trim() : '',
-        password: body.password ? await bcrypt.hash(password, salt) : '',
+        password: body.password && !isBcryptHash(body.password) ? 
+            await bcrypt.hash(password, salt) : '',
         active: body.active == 1 || body.active == 0 ? body.active : 1,
     }
 
     return bodyFormatted;
+}
+
+// Validação para saber se a senha já está criptografada
+function isBcryptHash(str) {
+  return /^\$2[aby]\$\d{2}\$/.test(str);
 }
 
 module.exports = {
