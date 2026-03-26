@@ -4,13 +4,13 @@ const ModulesRole = require('../models/ModulesRole');
 
 const getAll = async () => {
     return await Roles.query()
-        .select('id', 'name', 'type', 'created_at')
+        .select('id', 'name', 'type', 'created_at', 'updated_at')
         .withGraphFetched('modules');
 }
 
 const getById = async (roleId) => {
     const role = await Roles.query()
-        .select('id', 'name', 'type', 'created_at')
+        .select('id', 'name', 'type', 'created_at', 'updated_at')
         .findById(roleId)
         .withGraphFetched('modules');
 
@@ -48,7 +48,7 @@ const create = async (body) => {
     });
 
     const roleUser = await Roles.query()
-        .select('id', 'name', 'type', 'created_at')
+        .select('id', 'name', 'type', 'created_at', 'updated_at')
         .findById(role.id)
         .withGraphFetched('modules');
 
@@ -135,7 +135,7 @@ const update = async (body, roleId) => {
     });
 
     const roleUser = await Roles.query()
-        .select('id', 'name', 'type', 'created_at')
+        .select('id', 'name', 'type', 'created_at', 'updated_at')
         .findById(role.id)
         .withGraphFetched('modules');
 
