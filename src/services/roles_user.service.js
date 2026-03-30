@@ -59,7 +59,6 @@ function formatBody (body) {
     const roleName = body.name ? body.name.trim() : '';
     const bodyFormatted = {
         name: roleName,
-        type: roleName ? roleName.toLowerCase().replace(' ', '_') : '',
         modules_ids: body.modules_ids ? body.modules_ids : []
     }
 

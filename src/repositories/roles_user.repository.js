@@ -4,13 +4,13 @@ const ModulesRole = require('../models/ModulesRole');
 
 const getAll = async () => {
     return await Roles.query()
-        .select('id', 'name', 'type', 'created_at', 'updated_at')
+        .select('id', 'name', 'created_at', 'updated_at')
         .withGraphFetched('modules');
 }
 
 const getById = async (roleId) => {
     const role = await Roles.query()
-        .select('id', 'name', 'type', 'created_at', 'updated_at')
+        .select('id', 'name', 'created_at', 'updated_at')
         .findById(roleId)
         .withGraphFetched('modules');
 
@@ -35,8 +35,7 @@ const create = async (body) => {
     await Roles.transaction(async trx => {
         role = await Roles.query(trx)
             .insert({
-                name: body.name,
-                type: body.type
+                name: body.name
             });
 
         const modulesRoleToInsert = body.modules_ids.map((moduleId) => ({
@@ -48,7 +47,7 @@ const create = async (body) => {
     });
 
     const roleUser = await Roles.query()
-        .select('id', 'name', 'type', 'created_at', 'updated_at')
+        .select('id', 'name', 'created_at', 'updated_at')
         .findById(role.id)
         .withGraphFetched('modules');
 
@@ -92,8 +91,7 @@ const update = async (body, roleId) => {
     await Roles.transaction(async trx => {
         await Roles.query(trx)
             .patch({
-                name: body.name ? body.name : role.name,
-                type: body.type ? body.type : role.type
+                name: body.name ? body.name : role.name
             })
             .where('id', roleId);
 
@@ -135,7 +133,7 @@ const update = async (body, roleId) => {
     });
 
     const roleUser = await Roles.query()
-        .select('id', 'name', 'type', 'created_at', 'updated_at')
+        .select('id', 'name', 'created_at', 'updated_at')
         .findById(role.id)
         .withGraphFetched('modules');
 
