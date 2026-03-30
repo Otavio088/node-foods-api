@@ -22,6 +22,12 @@ class Users extends Model {
             }
         }
     }
+
+    static modifiers = {
+        defaultSelects(query) {
+            query.select('id', 'name', 'email', 'active');
+        }
+    }
 }
 
 module.exports = Users;
