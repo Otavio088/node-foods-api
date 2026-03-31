@@ -40,7 +40,7 @@ const create = async (req, res) => {
 
         const result = await usersService.create(body);
 
-        return res.status(200).send({
+        return res.status(201).send({
             message: result.message,
             data: result.data
         });
@@ -59,7 +59,7 @@ const update = async (req, res) => {
 
         const result = await usersService.update(body, params.id);
 
-        return res.status(201).send({
+        return res.status(200).send({
             message: result.message,
             data: result.data
         })

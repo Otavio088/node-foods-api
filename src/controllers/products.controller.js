@@ -59,7 +59,7 @@ const update = async (req, res) => {
 
         const result = await productsService.update(body, params.id);
 
-        return res.status(201).send({
+        return res.status(200).send({
             message: result.message,
             data: result.data
         })
@@ -77,7 +77,7 @@ const remove = async (req, res) => {
 
         const result = await productsService.remove(productId);
 
-        return res.status(201).send({
+        return res.status(200).send({
             message: result.message
         })
     } catch (err) {

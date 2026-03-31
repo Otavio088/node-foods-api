@@ -10,6 +10,7 @@ const modulesRoute = require('./modules.route');
 const usersRoute = require('./users.route');
 const rolesUserRoute = require('./roles_user.route');
 const productsRoute = require('./products.route');
+const unitTypesRoute = require('./unit_types.route');
 
 // Associação das url com os arquivos rota
 router.use('/auth', authRoute);
@@ -17,5 +18,6 @@ router.use('/modules', authMiddleware, modulesRoute);
 router.use('/users', authMiddleware, usersRoute);
 router.use('/user/roles', authMiddleware, rolesUserRoute);
 router.use('/products', authMiddleware, productsRoute);
+router.use('/unit_types', authMiddleware, unitTypesRoute);
 
 module.exports = router;
