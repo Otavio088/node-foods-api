@@ -19,6 +19,13 @@ class Ingredients extends Model {
             }
         }
     }
+
+    static modifiers = {
+        defaultSelectsIngredients(query) {
+            query.select('ingredients.id', 'ingredients.name', 'product_ingredients.quantity')
+            .whereNull('ingredients.deleted_at');
+        }
+    }
 }
 
 module.exports = Ingredients;

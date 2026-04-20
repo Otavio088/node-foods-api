@@ -24,9 +24,9 @@ class Users extends Model {
     }
 
     static modifiers = {
-        defaultSelects(query) {
-            query.select('id', 'name', 'email', 'active')
-            .whereNull('deleted_at');
+        defaultSelectsUser(query) {
+            query.select('users.id', 'users.name', 'users.email', 'users.active')
+            .whereNull('users.deleted_at');
         }
     }
 }

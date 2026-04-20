@@ -58,13 +58,27 @@ const remove = async (productId) => {
 function formatBody (body) {
     const productName = body.name.trim();
     const productDescription = body.description ? body.description.trim() : '';
+    const productIngredients = body.ingredients && Array.isArray(body.ingredients)
+        && body.ingredients.length > 0 ? body.ingredients.reduce((acc, i) => {
+            if (i.id !== undefined && i.quantity !== undefined) {
+                acc.push({
+                    ingredient_id: i.id,
+                    quantity: i.quantity.toFixed(2)
+                });
+            }
+
+            return acc;
+        }, []) : [];
 
     const bodyFormatted = {
-        name: productName,
-        description: productDescription,
-        image: body.image ? body.image : '',
-        price: body.price,
-        user_id: body.user_id
+        data: {
+            name: productName,
+            description: productDescription,
+            image: body.image ? body.image : '',
+            price: body.price,
+            user_id: body.user_id,
+        },
+        ingredients: productIngredients
     }
 
     return bodyFormatted;

@@ -5,7 +5,7 @@ const getAll = async () => {
     return await Ingredients.query()
         .select('id', 'name', 'created_at', 'updated_at')
         .whereNull('deleted_at')
-        .withGraphFetched('unit_type(defaultSelects)');
+        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 }
 
 const getById = async (id) => {
@@ -13,7 +13,7 @@ const getById = async (id) => {
         .select('id', 'name', 'created_at', 'updated_at')
         .findById(id)
         .whereNull('deleted_at')
-        .withGraphFetched('unit_type(defaultSelects)');
+        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 
 
     if (!ingredient)
@@ -39,7 +39,7 @@ const create = async (body) => {
     return await Ingredients.query()
         .select('id', 'name', 'created_at', 'updated_at')
         .findById(newIngredient.id)
-        .withGraphFetched('unit_type(defaultSelects)');
+        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 }
 
 const update = async (body, id) => {
@@ -70,7 +70,7 @@ const update = async (body, id) => {
     return Ingredients.query()
         .select('id', 'name', 'created_at', 'updated_at')
         .findById(ingredient.id)
-        .withGraphFetched('unit_type(defaultSelects)');
+        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 }
 
 const remove = async (id) => {

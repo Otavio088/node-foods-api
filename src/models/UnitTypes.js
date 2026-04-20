@@ -6,9 +6,9 @@ class UnitTypes extends Model {
     }
 
     static modifiers = {
-        defaultSelects(query) {
-            query.select('id', 'name', 'type')
-            .whereNull('deleted_at');
+        defaultSelectsUnitTypes(query) {
+            query.select('unit_types.id', 'unit_types.name', 'unit_types.type')
+            .whereNull('unit_types.deleted_at');
         }
     }
 }
