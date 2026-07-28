@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
+const HttpError = require('../classes/HttpError');
 
-const authMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
     try {
         const token = req.cookies.token;
 
         if (!token)
-            return res.status(401).send({ message: 'Usuário não autenticado!' });
+            throw new HttpError('Usuário não autenticado!', 401);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -13,10 +14,6 @@ const authMiddleware = (req, res, next) => {
 
         next();
     } catch (err) {
-        return res.status(401).send({
-            message: 'Token inválido'
-        });
+        next(new HttpError('Token inválido!', 401));
     }
 }
-
-module.exports = authMiddleware;

@@ -1,89 +1,66 @@
 const usersService = require('../services/users.service');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     try {
         const result = await usersService.getAll();
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: result.length > 0 ? 'Usuários encontrados com sucesso!' : 'Nenhum Usuário foi encontrado!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: []
-        });
+        next(err);
     }
 }
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
     try {
-        const userId = req.params.id;
-
-        const result = await usersService.getById(userId);
+        const result = await usersService.getById(req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: 'Usuário encontrado com sucesso!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
+        next(err);
     }
 }
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
     try {
-        const body = req.body;
-
-        const result = await usersService.create(body);
+        const result = await usersService.create(req.body);
 
         return res.status(201).send({
-            message: result.message,
-            data: result.data
+            message: 'Usuário criado com sucesso!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
+        next(err);
     }
 }
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
     try {
-        const body = req.body;
-        const params = req.params;
-
-        const result = await usersService.update(body, params.id);
+        const result = await usersService.update(req.body, req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
+            message: 'Usuário atualizado com sucesso!',
+            data: result
         });
+    } catch (err) {
+        next(err);
     }
 }
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
     try {
-        const userId = req.params.id;
-
-        const result = await usersService.remove(userId);
+        const result = await usersService.remove(req.params.id);
 
         return res.status(200).send({
-            message: result.message
+            message: 'Usuário removido com sucesso!'
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-        });
+        next(err);
     }
 }
 

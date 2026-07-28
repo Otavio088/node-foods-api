@@ -1,11 +1,13 @@
 const express = require('express');
+const app = express();
+
+require('./database/index');
+
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const routes = require('./routes/index');
-require('./database/index'); // Executa a conexão via knex e faz atribuição no objectionjs
-
-const app = express();
+const errorMiddleware = require('./middlewares/error.middleware');
 
 app.use(cors({
     origin: 'http://localhost:4200',
@@ -14,6 +16,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(routes);
+app.use(errorMiddleware);
 
 
 app.listen(process.env.PORT, function() {

@@ -1,10 +1,8 @@
 const authService = require('../services/auth.service');
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     try {
-        const body = req.body;
-
-        const result = await authService.login(body);
+        const result = await authService.login(req.body);
 
         res.cookie('token', result.token, {
             httpOnly: true, // Impede javascript de acessar o cookie
@@ -14,14 +12,11 @@ const login = async (req, res) => {
         });
 
         return res.status(200).send({
-            message: result.message,
+            message: 'Seja bem-vindo!',
             data: result.data
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
+        next(err);
     }
 }
 

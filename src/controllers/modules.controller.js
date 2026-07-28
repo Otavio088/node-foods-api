@@ -5,8 +5,8 @@ const getAll = async (req, res) => {
         const result = await modulesService.getAll();
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: result.length > 0 ? 'Módulos encontrados com sucesso!' : 'Nenhum Módulo foi encontrado!',
+            data: result
         });
     } catch (err) {
         return res.status(500).send({

@@ -1,3 +1,5 @@
+// Executa a conexão via knex e faz atribuição no objectionjs
+
 const knexfile = require('../../knexfile');
 const Knex = require('knex');
 const { Model } = require('objection');

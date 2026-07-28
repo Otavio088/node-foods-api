@@ -3,38 +3,44 @@ const Roles = require('../models/Roles');
 const RolesUser = require('../models/RolesUser');
 
 const getAll = async () => {
-    return await Users.query()
-        .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
+    return Users.query()
+        .select('id', 'name', 'email', 'active', 'created_at', 'updated_at')
         .whereNull('deleted_at')
         .withGraphFetched('roles.modules');
 }
 
 const getById = async (userId) => {
-    const user = await Users.query()
+    return Users.query()
         .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
         .findById(userId)
         .whereNull('deleted_at')
         .withGraphFetched('roles.modules');
+}
 
+const getByEmail = async (email, userId = null) => {
+    const query = Users.query()
+        .select('id')
+        .findOne({ email })
+        .whereNull('deleted_at');
 
-    if (!user)
-        throw new Error('Usuário inexistente!');
+    if (userId)
+        query.whereNot('id', userId);
 
-    return user;
+    return query;
+}
+
+const getRolesIdsExist = async (rolesIds) => {
+    const rolesExist = await Roles.query()
+        .select('id')
+        .whereIn('id', rolesIds);
+
+    return rolesExist && rolesExist.length > 0 ?
+        rolesExist.map(r => r.id) : [];
 }
 
 const create = async (body) => {
-    const existUser = await Users.query()
-        .select('id')
-        .findOne({
-            email: body.email
-        })
-        .whereNull('deleted_at');
-
-    if (existUser)
-        throw new Error('Já existe um Usuário com este e-mail!');
-
     let user;
+
     await Users.transaction(async trx => {
         user = await Users.query(trx)
             .insert({
@@ -47,39 +53,16 @@ const create = async (body) => {
         const rolesUserToInsert = body.roles_ids.map((roleId) => ({
             user_id: user.id,
             role_id: roleId
-        })) || [];
-
-        if (Array.isArray(rolesUserToInsert) && rolesUserToInsert.length > 0) {
+        }));
+console.log('rolesUserToInsert: ',rolesUserToInsert);
+        if (Array.isArray(rolesUserToInsert) && rolesUserToInsert.length > 0)
             await trx('roles_user').insert(rolesUserToInsert);
-        }
     });
 
-    const newUser = await Users.query()
-        .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
-        .findById(user.id)
-        .withGraphFetched('roles.modules');
-
-    return newUser;
+    return user.id;
 }
 
 const update = async (body, userId) => {
-    const existOtherUser = await Users.query()
-        .select('id')
-        .whereNot('id', userId)
-        .findOne({
-            email: body.email
-        });
-
-    if (existOtherUser)
-        throw new Error('Já existe um Usuário com este e-mail!');
-
-    const user = await Users.query()
-        .findById(userId)
-        .whereNull('deleted_at');
-
-    if (!user)
-        throw new Error('Usuário inexistente!');
-
     const rolesExist = await Roles.query()
         .select('id')
         .whereIn('id', body.roles_ids);
@@ -89,9 +72,9 @@ const update = async (body, userId) => {
 
     const rolesUserUpdateMap = new Map();
     for (const roleId of rolesIds) {
-        const key = `${user.id}_${roleId}`;
+        const key = `${userId}_${roleId}`;
         rolesUserUpdateMap.set(key, {
-            user_id: user.id,
+            user_id: userId,
             role_id: roleId
         });
     }
@@ -99,20 +82,20 @@ const update = async (body, userId) => {
     await Users.transaction(async trx => {
         await Users.query(trx)
             .patch({
-                name: body.name ? body.name : user.name,
-                email: body.email ? body.email : user.email,
-                password: body.password ? body.password : user.password,
-                active: body.active !== undefined ? body.active : user.active,
+                name: body.name,
+                email: body.email,
+                password: body.password,
+                active: body.active,
             })
             .where('id', userId);
 
         const rolesUser = await RolesUser.query(trx)
-            .where('user_id', user.id);
+            .where('user_id', userId);
 
         const rolesUserMap = new Map();
-        for (const moduleRole of rolesUser) {
-            const key = `${moduleRole.role_id}_${moduleRole.module_id}`;
-            rolesUserMap.set(key, moduleRole);
+        for (const roleUser of rolesUser) {
+            const key = `${roleUser.user_id}_${roleUser.role_id}`;
+            rolesUserMap.set(key, roleUser);
         }
 
         const rolesUserToInsert = [];
@@ -142,26 +125,9 @@ const update = async (body, userId) => {
                 .whereIn('id', rolesUserToDelete);
         }
     });
-
-    const updatedUser = await Users.query()
-        .select('id', 'name', 'email', 'password', 'active', 'created_at', 'updated_at')
-        .findById(user.id)
-        .withGraphFetched('roles.modules');
-
-    return updatedUser;
 }
 
 const remove = async (userId) => {
-    const existUser = await Users.query()
-        .select('id')
-        .findOne({
-            id: userId,
-            deleted_at: null
-        });
-
-    if (!existUser)
-        throw new Error('Usuário inexistente!');
-
     await Users.query()
         .patch({
             deleted_at: new Date()
@@ -173,6 +139,8 @@ const remove = async (userId) => {
 module.exports = {
     getAll,
     getById,
+    getByEmail,
+    getRolesIdsExist,
     create,
     update,
     remove

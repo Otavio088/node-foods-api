@@ -1,62 +1,97 @@
-const create = async (req, res, next) => {
-    const body = req.body;
+const { body } = require('express-validator');
+const HttpError = require('../classes/HttpError');
+const validatorMiddleware = require('../middlewares/validator.middleware');
 
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado para a criação do Usuário!', data: {} });
+const create = [
+    body('name')
+        .notEmpty()
+        .withMessage('Nome de usuário é obrigatório!'),
 
-    if (!body.roles_ids || !Array.isArray(body.roles_ids))
-        return res.status(400).send({ message: 'Tipos de Usuário é obrigatório e deve ser um array!', field: 'roles_ids', data: {} });
+    body('email')
+        .notEmpty()
+        .withMessage('E-mail de usuário é obrigatório!')
+        .isEmail()
+        .withMessage('E-mail inválido.'),
 
-    if (body.roles_ids.length === 0)
-        return res.status(400).send({ message: 'Tipos de Usuário é obrigatório!', field: 'roles_ids', data: {} });
+    body('password')
+        .notEmpty()
+        .withMessage('Senha do usuário é obrigatória!')
+        .isLength({ min: 6 })
+        .withMessage('A senha deve possuir pelo menos 6 caracteres.'),
 
-    if (!body.name || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome de Usuário é obrigatório!', field: 'name', data: {} });
+    body('password_confirm')
+        .notEmpty()
+        .withMessage('Confirmação de senha do usuário é obrigatória!')
+        .isLength({ min: 6 })
+        .withMessage('A confirmação de senha deve possuir pelo menos 6 caracteres.')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new HttpError('Senha e Confirmação de Senha devem ser iguais!', 400);
+            }
+            return true;
+        }),
 
-    if (!body.email)
-        return res.status(400).send({ message: 'E-mail de Usuário é obrigatório!', field: 'email', data: {} });
+    body('roles_ids')
+        .notEmpty()
+        .withMessage('As permissões de usuário são obrigatórias!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo menos 1 ID de permissão de usuário'),
 
-    if (!body.password)
-        return res.status(400).send({ message: 'Senha do Usuário é obrigatória!', field: 'password', data: {} });
+    body('active')
+        .optional()
+        .isBoolean()
+        .withMessage('O active deve ser booleano (true ou false)'),
 
-    if (!body.password_confirm)
-        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatória!', field: 'password_confirm', data: {} });
+    validatorMiddleware
+];
 
-    if (String(body.password) !== String(body.password_confirm))
-        return res.status(400).send({ message: 'Senha e Confirmação de Senha devem ser iguais!', field: 'password, password_confirm', data: {} });
+const update = [
+    body('name')
+        .optional()
+        .notEmpty()
+        .withMessage('Nome de usuário não pode ser vazio!'),
 
-    return next();
-}
+    body('email')
+        .optional()
+        .notEmpty()
+        .withMessage('E-mail de usuário não pode ser vazio!')
+        .isEmail()
+        .withMessage('E-mail inválido.'),
 
-const update = async (req, res, next) => {
-    const body = req.body;
+    body('password')
+        .optional()
+        .notEmpty()
+        .withMessage('Senha do usuário não pode ser vazia!')
+        .isLength({ min: 6 })
+        .withMessage('A senha deve possuir pelo menos 6 caracteres.'),
 
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado para a atualização do Usuário!', data: {} });
+    body('password_confirm')
+        .optional()
+        .notEmpty()
+        .withMessage('Confirmação de senha do usuário não pode ser vazia!')
+        .isLength({ min: 6 })
+        .withMessage('A confirmação de senha deve possuir pelo menos 6 caracteres.')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new HttpError('Senha e Confirmação de Senha devem ser iguais!', 400);
+            }
+            return true;
+        }),
 
-    if (!body.roles_ids || !Array.isArray(body.roles_ids))
-        return res.status(400).send({ message: 'Tipos de Usuário é obrigatório e deve ser um array!', field: 'roles_ids', data: {} });
+    body('roles_ids')
+        .optional()
+        .notEmpty()
+        .withMessage('As permissões de usuário não podem ser vazias!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo menos 1 ID de permissão de usuário'),
 
-    if (body.roles_ids.length === 0)
-        return res.status(400).send({ message: 'Tipos de Usuário é obrigatório para atualização!', field: 'roles_ids', data: {} });
+    body('active')
+        .optional()
+        .isBoolean()
+        .withMessage('O active deve ser booleano (true ou false)'),
 
-    if (!body.name || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome de Usuário é obrigatório para atualização!', field: 'name', data: {} });
-
-    if (!body.email)
-        return res.status(400).send({ message: 'E-mail de Usuário é obrigatório para atualização!', field: 'email', data: {} });
-
-    if (!body.password)
-        return res.status(400).send({ message: 'Senha do Usuário é obrigatória para atualização!', field: 'password', data: {} });
-
-    if (!body.password_confirm)
-        return res.status(400).send({ message: 'Confirmação de Senha do Usuário é obrigatória para atualização!', field: 'password_confirm', data: {} });
-
-    if (String(body.password) !== String(body.password_confirm))
-        return res.status(400).send({ message: 'Senha e Confirmação de Senha devem ser iguais!', field: 'password, password_confirm', data: {} });
-
-    return next();
-}
+    validatorMiddleware
+];
 
 module.exports = {
     create,

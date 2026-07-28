@@ -1,84 +1,95 @@
 const usersRepository = require('../repositories/users.repository');
+const HttpError = require('../classes/HttpError');
 
 const getAll = async () => {
-    const data = await usersRepository.getAll();
-
-    if (data && data.length === 0) {
-        return {
-            message: 'Nenhum Usuário foi encontrado!',
-            data: []
-        }
-    }
-
-    return {
-        message: 'Usuários encontrados com sucesso!',
-        data: data
-    }
-
+    return usersRepository.getAll();
 }
 
 const getById = async (userId) => {
     const data = await usersRepository.getById(userId);
 
-    return {
-        message: 'Usuário encontrado com sucesso!',
-        data: data
-    }
+    if (!data)
+        throw new HttpError('Usuário inexistente!', 404);
 
+    delete data.password;
+
+    return data;
 }
 
 const create = async (body) => {
-    const bodyFormatted = await formatBody(body);
+    const userExist = await usersRepository.getByEmail(body.email.trim());
 
-    const data = await usersRepository.create(bodyFormatted);
+    if (userExist)
+        throw new HttpError('Já existe um Usuário com este e-mail!', 409);
 
-    return {
-        message: 'Usuário criado com sucesso!',
-        data: data
-    }
+    const rolesIdsExist = await usersRepository.getRolesIdsExist(body.roles_ids);
+
+    if (rolesIdsExist.length === 0)
+        throw new HttpError('Nenhum role_id informado é válido. Envie IDs existentes!', 400);
+
+    bodyFormatted.roles_ids = rolesIdsExist;
+
+    const bodyFormatted = await normalizeData(body);
+
+    const newUserId = await usersRepository.create(bodyFormatted);
+
+    const data = await usersRepository.getById(newUserId);
+    
+    delete data.password;
+
+    return data;
 }
 
-const update = async (body, roleId) => {
-    const bodyFormatted = await formatBody(body);
+const update = async (body, userId) => {
+    const userExist = await usersRepository.getById(userId);
 
-    const data = await usersRepository.update(bodyFormatted, roleId);
+    if (!userExist)
+        throw new HttpError('Usuário inexistente!', 404);
 
-    return {
-        message: 'Usuário atualizado com sucesso!',
-        data: data
-    }
+    const bodyFormatted = await normalizeData(body, userExist);
+
+    const userExistEmail = await usersRepository.getByEmail(bodyFormatted.email, userId);
+
+    if (userExistEmail)
+        throw new HttpError('Já existe um Usuário com este e-mail!', 409);
+
+    await usersRepository.update(bodyFormatted, userId);
+
+    const data =  await usersRepository.getById(userId);
+
+    delete data.password;
+
+    return data;
 }
 
 const remove = async (userId) => {
+    const data = await usersRepository.getById(userId);
+
+    if (!data)
+        throw new HttpError('Usuário inexistente!', 404);
+
     await usersRepository.remove(userId);
+}
+
+const normalizeData = async (body, user = null) => {
+    const bcrypt = require('bcrypt');
+    const salt = await bcrypt.genSalt();
+    const password = body.password ? String(body.password).trim() : '';
 
     return {
-        message: 'Usuário excluído com sucesso!'
+        name: body.name ? body.name.trim() 
+            : user?.name ? user.name : '',
+        roles_ids: body.roles_ids && body.roles_ids.length > 0 ? body.roles_ids 
+            : user?.roles && user?.roles.length > 0 ? user.roles.map(role => role.id)
+            : [],
+        email: body.email ? body.email.trim()
+            : user?.email ? user.email : '',
+        password:password ? await bcrypt.hash(password, salt)
+            : user?.password ? user.password : '',
+        active: body.active !== undefined ? body.active 
+            : user?.active !== undefined ? user.active 
+            : true,
     }
-
-}
-
-const formatBody = async (body) => {
-    const bcrypt = require('bcrypt');
-
-    const salt = await bcrypt.genSalt();
-    const password = String(body.password).trim();
-
-    const bodyFormatted = {
-        name: body.name ? String(body.name).trim() : '',
-        roles_ids: body.roles_ids,
-        email: body.email ? String(body.email).trim() : '',
-        password: body.password && !isBcryptHash(body.password) ? 
-            await bcrypt.hash(password, salt) : '',
-        active: body.active == 1 || body.active == 0 ? body.active : 1,
-    }
-
-    return bodyFormatted;
-}
-
-// Validação para saber se a senha já está criptografada
-function isBcryptHash(str) {
-  return /^\$2[aby]\$\d{2}\$/.test(str);
 }
 
 module.exports = {

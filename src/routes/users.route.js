@@ -3,6 +3,7 @@ const router = express.Router();
 
 const usersValidator = require('../validators/users.validator');
 const usersController = require('../controllers/users.controller');
+const validatorMiddleware = require('../middlewares/validator.middleware');
 
 router.get('/', usersController.getAll)
 router.get('/:id', usersController.getById)

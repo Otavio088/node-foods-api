@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-// Verificação de autenticação
+// Middlewares
 const authMiddleware = require('../middlewares/auth.middleware');
+const errorMiddleware = require('../middlewares/error.middleware');
 
 // Importação dos arquivos de rota
 const authRoute = require('./auth.route');
