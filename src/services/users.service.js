@@ -1,4 +1,5 @@
 const usersRepository = require('../repositories/users.repository');
+const rolesUserRepository = require('../repositories/roles_user.repository');
 const HttpError = require('../classes/HttpError');
 
 const getAll = async () => {
@@ -22,14 +23,14 @@ const create = async (body) => {
     if (userExist)
         throw new HttpError('Já existe um Usuário com este e-mail!', 409);
 
-    const rolesIdsExist = await usersRepository.getRolesIdsExist(body.roles_ids);
+    const bodyFormatted = await normalizeData(body);
 
-    if (rolesIdsExist.length === 0)
+    const rolesExist = await rolesUserRepository.getByIds(bodyFormatted.roles_ids);
+
+    if (rolesExist.length === 0)
         throw new HttpError('Nenhum role_id informado é válido. Envie IDs existentes!', 400);
 
-    bodyFormatted.roles_ids = rolesIdsExist;
-
-    const bodyFormatted = await normalizeData(body);
+    bodyFormatted.roles_ids = rolesExist.map(r => r.id);
 
     const newUserId = await usersRepository.create(bodyFormatted);
 
@@ -46,12 +47,19 @@ const update = async (body, userId) => {
     if (!userExist)
         throw new HttpError('Usuário inexistente!', 404);
 
-    const bodyFormatted = await normalizeData(body, userExist);
-
-    const userExistEmail = await usersRepository.getByEmail(bodyFormatted.email, userId);
+    const userExistEmail = await usersRepository.getByEmail(body.email.trim(), userId);
 
     if (userExistEmail)
         throw new HttpError('Já existe um Usuário com este e-mail!', 409);
+
+    const bodyFormatted = await normalizeData(body, userExist);
+
+    const rolesExist = await rolesUserRepository.getByIds(bodyFormatted.roles_ids);
+
+    if (rolesExist.length === 0)
+        throw new HttpError('Nenhum role_id informado é válido. Envie IDs existentes!', 400);
+
+    bodyFormatted.roles_ids = rolesExist.map(r => r.id);
 
     await usersRepository.update(bodyFormatted, userId);
 
@@ -84,7 +92,7 @@ const normalizeData = async (body, user = null) => {
             : [],
         email: body.email ? body.email.trim()
             : user?.email ? user.email : '',
-        password:password ? await bcrypt.hash(password, salt)
+        password: password ? await bcrypt.hash(password, salt)
             : user?.password ? user.password : '',
         active: body.active !== undefined ? body.active 
             : user?.active !== undefined ? user.active 

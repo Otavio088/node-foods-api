@@ -29,15 +29,6 @@ const getByEmail = async (email, userId = null) => {
     return query;
 }
 
-const getRolesIdsExist = async (rolesIds) => {
-    const rolesExist = await Roles.query()
-        .select('id')
-        .whereIn('id', rolesIds);
-
-    return rolesExist && rolesExist.length > 0 ?
-        rolesExist.map(r => r.id) : [];
-}
-
 const create = async (body) => {
     let user;
 
@@ -54,7 +45,7 @@ const create = async (body) => {
             user_id: user.id,
             role_id: roleId
         }));
-console.log('rolesUserToInsert: ',rolesUserToInsert);
+
         if (Array.isArray(rolesUserToInsert) && rolesUserToInsert.length > 0)
             await trx('roles_user').insert(rolesUserToInsert);
     });
@@ -63,15 +54,8 @@ console.log('rolesUserToInsert: ',rolesUserToInsert);
 }
 
 const update = async (body, userId) => {
-    const rolesExist = await Roles.query()
-        .select('id')
-        .whereIn('id', body.roles_ids);
-
-    const rolesIds = rolesExist && rolesExist.length > 0 ?
-        rolesExist.map(r => r.id) : [];
-
     const rolesUserUpdateMap = new Map();
-    for (const roleId of rolesIds) {
+    for (const roleId of body.roles_ids) {
         const key = `${userId}_${roleId}`;
         rolesUserUpdateMap.set(key, {
             user_id: userId,
@@ -115,15 +99,11 @@ const update = async (body, userId) => {
             }
         }
 
-        if (rolesUserToInsert.length > 0) {
+        if (rolesUserToInsert.length > 0)
             await trx('roles_user').insert(rolesUserToInsert);
-        }
 
-        if (rolesUserToDelete.length > 0) {
-            await RolesUser.query(trx)
-                .delete()
-                .whereIn('id', rolesUserToDelete);
-        }
+        if (rolesUserToDelete.length > 0)
+            await RolesUser.query(trx).delete().whereIn('id', rolesUserToDelete);
     });
 }
 
@@ -140,7 +120,6 @@ module.exports = {
     getAll,
     getById,
     getByEmail,
-    getRolesIdsExist,
     create,
     update,
     remove

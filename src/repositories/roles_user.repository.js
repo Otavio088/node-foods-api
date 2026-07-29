@@ -21,6 +21,12 @@ const getById = async (roleId) => {
     return role;
 }
 
+const getByIds = async (rolesIds) => {
+    return Roles.query()
+        .select('id')
+        .whereIn('id', rolesIds);
+}
+
 const create = async (body) => {
     const existRole = await Roles.query()
         .select('id')
@@ -155,6 +161,7 @@ const remove = async (roleId) => {
 module.exports = {
     getAll,
     getById,
+    getByIds,
     create,
     update,
     remove

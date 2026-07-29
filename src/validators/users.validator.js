@@ -35,14 +35,12 @@ const create = [
         .notEmpty()
         .withMessage('As permissões de usuário são obrigatórias!')
         .isArray({min: 1})
-        .withMessage('Informe pelo menos 1 ID de permissão de usuário'),
+        .withMessage('Informe pelo uma permissão de usuário'),
 
     body('active')
         .optional()
         .isBoolean()
         .withMessage('O active deve ser booleano (true ou false)'),
-
-    validatorMiddleware
 ];
 
 const update = [
@@ -63,7 +61,13 @@ const update = [
         .notEmpty()
         .withMessage('Senha do usuário não pode ser vazia!')
         .isLength({ min: 6 })
-        .withMessage('A senha deve possuir pelo menos 6 caracteres.'),
+        .withMessage('A senha deve possuir pelo menos 6 caracteres.')
+        .custom((value, { req }) => {
+            if (value !== req.body.password_confirm) {
+                throw new HttpError('Senha e Confirmação de Senha devem ser iguais!', 400);
+            }
+            return true;
+        }),
 
     body('password_confirm')
         .optional()
@@ -89,8 +93,6 @@ const update = [
         .optional()
         .isBoolean()
         .withMessage('O active deve ser booleano (true ou false)'),
-
-    validatorMiddleware
 ];
 
 module.exports = {
