@@ -1,6 +1,6 @@
 const modulesService = require('../services/modules.service');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     try {
         const result = await modulesService.getAll();
 
@@ -9,10 +9,7 @@ const getAll = async (req, res) => {
             data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: []
-        });
+        next(err);
     }
 }
 

@@ -1,87 +1,78 @@
+const HttpError = require('../classes/HttpError');
 const productsRepository = require('../repositories/products.repository');
 
 const getAll = async () => {
-    const data = await productsRepository.getAll();
-
-    if (data && data.length === 0) {
-        return {
-            message: 'Nenhum Produto foi encontrado!',
-            data: []
-        }
-    }
-
-    return {
-        message: 'Produtos encontrados com sucesso!',
-        data: data
-    }
+    return productsRepository.getAll();
 }
 
 const getById = async (productId) => {
     const data = await productsRepository.getById(productId);
 
-    return {
-        message: 'Produto encontrado com sucesso!',
-        data: data
-    }
+    if (!data)
+        throw new HttpError('Produto inexistente!', 400);
+
+    return data;
 }
 
 const create = async (body) => {
-    const bodyFormatted = formatBody(body);
+    const bodyFormatted = normalizeData(body);
 
-    const data = await productsRepository.create(bodyFormatted);
+    const newProductId = await productsRepository.create(bodyFormatted);
 
-    return {
-        message: 'Produto cadastrado com sucesso!',
-        data: data
-    }
+    return productsRepository.getById(newProductId);
 }
 
 const update = async (body, productId) => {
-    const bodyFormatted = formatBody(body);
+    const productExist = await productsRepository.getById(productId);
 
-    const data = await productsRepository.update(bodyFormatted, productId);
+    if (!productExist)
+        throw new HttpError('Produto inexistente!', 400);
 
-    return {
-        message: 'Produto atualizado com sucesso!',
-        data: data
-    }
+    const bodyFormatted = normalizeData(body, productExist);
+
+    await productsRepository.update(bodyFormatted, productId);
+
+    return await productsRepository.getById(productId);
 }
 
 const remove = async (productId) => {
-    await productsRepository.remove(productId);
+    const productExist = await productsRepository.getById(productId);
 
-    return {
-        message: 'Produto excluído com sucesso!'
-    }
+    if (!productExist)
+        throw new HttpError('Produto inexistente!', 400);
+
+    productsRepository.remove(productId);
 }
 
-function formatBody (body) {
-    const productName = body.name.trim();
-    const productDescription = body.description ? body.description.trim() : '';
-    const productIngredients = body.ingredients && Array.isArray(body.ingredients)
-        && body.ingredients.length > 0 ? body.ingredients.reduce((acc, i) => {
+function normalizeData (body, product = null) {
+    return {
+        name: body.name ? body.name.trim() 
+            : product?.name ? product.name : '',
+        description: body.description ? body.description.trim() 
+            : product?.description ? product.description : '',
+        price: body.price ? body.price 
+            : product?.price ? product.price : 0,
+        user_id: Object.keys(body).length > 1 && body.user_id ? body.user_id 
+            : product?.user?.id  ? product.user.id : 0,
+        image: body.image ? body.image 
+            : product?.image ? product.image : '',
+        ingredients: body.ingredients ? body.ingredients.reduce((acc, i) => {
             if (i.id !== undefined && i.quantity !== undefined) {
                 acc.push({
                     ingredient_id: i.id,
                     quantity: i.quantity.toFixed(2)
                 });
             }
-
             return acc;
-        }, []) : [];
+        }, []) : product?.ingredients ? product.ingredients.reduce((acc, i) => {
+                acc.push({
+                    ingredient_id: i.id,
+                    quantity: i.quantity.toFixed(2)
+                });
+            return acc;
+        }, []) : [],
 
-    const bodyFormatted = {
-        data: {
-            name: productName,
-            description: productDescription,
-            image: body.image ? body.image : '',
-            price: body.price,
-            user_id: body.user_id,
-        },
-        ingredients: productIngredients
     }
-
-    return bodyFormatted;
 }
 
 module.exports = {

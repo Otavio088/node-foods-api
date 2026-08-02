@@ -2,31 +2,32 @@ const Products = require('../models/Products');
 const ProductIngredients = require('../models/ProductIngredients');
 
 const getAll = async () => {
-    return await Products.query()
+    return Products.query()
         .select('id', 'name', 'description', 'image', 'price', 'created_at', 'updated_at')
         .whereNull('deleted_at')
         .withGraphFetched('[ingredients(defaultSelectsIngredients).unit_type(defaultSelectsUnitTypes), user(defaultSelectsUser)]');
 }
 
 const getById = async (productId) => {
-    const product = await Products.query()
+    return Products.query()
         .select('id', 'name', 'description', 'image', 'price', 'created_at', 'updated_at')
         .findById(productId)
         .whereNull('deleted_at')
         .withGraphFetched('[ingredients(defaultSelectsIngredients).unit_type(defaultSelectsUnitTypes), user(defaultSelectsUser)]');
-
-
-    if (!product)
-        throw new Error('Produto inexistente!');
-
-    return product;
 }
 
 const create = async (body) => {
     let product;
+
     await Products.transaction(async trx => {
         product = await Products.query(trx)
-            .insert(body.data);
+            .insert({
+                name: body.name,
+                price: body.price,
+                user_id: body.user_id,
+                description: body.description,
+                image: body.image,
+            });
 
         if (body.ingredients.length > 0) {
             const productIngredients = body.ingredients.map((i) => ({
@@ -39,28 +40,16 @@ const create = async (body) => {
         }
     });
 
-    return await Products.query()
-        .select('id', 'name', 'description', 'image', 'price', 'created_at', 'updated_at')
-        .findById(product.id)
-        .withGraphFetched('[ingredients(defaultSelectsIngredients).unit_type(defaultSelectsUnitTypes), user(defaultSelectsUser)]');
+    return product.id;
 }
 
 const update = async (body, productId) => {
-    const productToUpdate = await Products.query()
-        .select('id')
-        .findById(productId)
-        .whereNull('deleted_at');
-
-    if (!productToUpdate)
-        throw new Error('Produto inexistente!');
-
-    // Ingredientes enviados para update
     const productIngredientsToUpdateMap = new Map();
     for (const ingredient of body.ingredients) {
-        const key = `${productToUpdate.id}_${ingredient.ingredient_id}`;
+        const key = `${productId}_${ingredient.ingredient_id}`;
 
         productIngredientsToUpdateMap.set(key, {
-            product_id: productToUpdate.id,
+            product_id: productId,
             ingredient_id: ingredient.ingredient_id,
             quantity: Number(ingredient.quantity)
         });
@@ -68,15 +57,19 @@ const update = async (body, productId) => {
 
     await Products.transaction(async trx => {
         await Products.query(trx)
-            .patch(body.data)
-            .where('id', productToUpdate.id);
+            .patch({
+                name: body.name,
+                price: body.price,
+                user_id: body.user_id,
+                description: body.description,
+                image: body.image,
+            })
+            .where('id', productId);
 
-        // Ingredientes de Produtos que já existem
         const productIngredientsExist = await ProductIngredients.query(trx)
             .select('id', 'product_id', 'ingredient_id', 'quantity')
-            .where('product_id', productToUpdate.id);
+            .where('product_id', productId);
 
-        // Organiza formato map
         const productIngredientsExistMap = new Map();
         for (const productIngredient of productIngredientsExist) {
             const key = `${productIngredient.product_id}_${productIngredient.ingredient_id}`;
@@ -89,7 +82,6 @@ const update = async (body, productId) => {
             });
         }
 
-        // Validação para inserções e atualizações
         const productIngredientsToInsert = [];
         const productIngredientsToUpdate = [];
         for (const [key, value] of productIngredientsToUpdateMap) {
@@ -108,7 +100,6 @@ const update = async (body, productId) => {
             }
         }
 
-        // Validação para deleções
         const productIngredientsIdsToDelete = [];
         for (const [key, value] of productIngredientsExistMap) {
             if (!productIngredientsToUpdateMap.has(key)) {
@@ -116,9 +107,8 @@ const update = async (body, productId) => {
             }
         }
 
-        if (productIngredientsToInsert.length > 0) {
+        if (productIngredientsToInsert.length > 0)
             await trx('product_ingredients').insert(productIngredientsToInsert);
-        }
 
         if (productIngredientsToUpdate.length > 0) {
             for (const productIngredient of productIngredientsToUpdate) {
@@ -131,35 +121,19 @@ const update = async (body, productId) => {
             }
         }
 
-        if (productIngredientsIdsToDelete.length > 0) {
-            await ProductIngredients.query(trx)
-                .delete()
-                .whereIn('id', productIngredientsIdsToDelete);
-        }
+        if (productIngredientsIdsToDelete.length > 0)
+            await ProductIngredients.query(trx).delete().whereIn('id', productIngredientsIdsToDelete);
     });
-
-    return await Products.query()
-        .select('id', 'name', 'description', 'image', 'price', 'created_at', 'updated_at')
-        .findById(productToUpdate.id)
-        .withGraphFetched('[ingredients(defaultSelectsIngredients).unit_type(defaultSelectsUnitTypes), user(defaultSelectsUser)]');
 }
 
 const remove = async (productId) => {
-    const existProduct = await Products.query()
-        .select('id')
-        .findById(productId)
-        .whereNull('deleted_at');
-
-    if (!existProduct)
-        throw new Error('Produto inexistente!');
-
     await Products.query()
         .patch({
             deleted_at: new Date()
         })
         .where('id', productId);
 
-    await ProductIngredients.query()
+    ProductIngredients.query()
         .delete()
         .where('product_id', productId);
 }

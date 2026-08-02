@@ -47,10 +47,12 @@ const update = async (body, userId) => {
     if (!userExist)
         throw new HttpError('Usuário inexistente!', 404);
 
-    const userExistEmail = await usersRepository.getByEmail(body.email.trim(), userId);
+    if (body.email) {
+        const userExistEmail = await usersRepository.getByEmail(body.email.trim(), userId);
 
-    if (userExistEmail)
-        throw new HttpError('Já existe um Usuário com este e-mail!', 409);
+        if (userExistEmail)
+            throw new HttpError('Já existe um Usuário com este e-mail!', 409);
+    }
 
     const bodyFormatted = await normalizeData(body, userExist);
 

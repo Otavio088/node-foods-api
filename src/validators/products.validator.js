@@ -1,21 +1,62 @@
-const createAndUpdate = async (req, res, next) => {
-    const body = req.body;
+const { body } = require('express-validator');
 
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado!', data: {} });
+const create = [
+    body('name')
+        .trim()
+        .notEmpty()
+        .withMessage('Nome do produto é obrigatório!'),
 
-    if (!body.name || typeof body.name !== 'string' || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome do Produto é obrigatório!', field: 'name', data: {} });
+    body('price')
+        .notEmpty()
+        .withMessage('Preço do produto é obrigatório!')
+        .isFloat()
+        .withMessage('Preço do produto deve ser número real!'),
 
-    if (!body.price || typeof body.price !== 'number')
-        return res.status(400).send({ message: 'Preço do Produto é obrigatório!', field: 'price', data: {} });
+    body('user_id')
+        .notEmpty()
+        .withMessage('ID de usuário é obrigatório!')
+        .isInt()
+        .withMessage('ID de usuário deve ser inteiro!'),
 
-    if (!body.user_id || typeof body.user_id !== 'number')
-        return res.status(400).send({ message: 'Código de Usuário é obrigatório!', field: 'user_id', data: {} });
+    body('ingredients')
+        .optional()
+        .isArray()
+        .withMessage('Os ingredientes deve ser um array de objetos!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo um igrediente!')
 
-    return next();
-}
+];
+
+const update = [
+    body('name')
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage('Nome do produto é obrigatório!'),
+
+    body('price')
+        .optional()
+        .notEmpty()
+        .withMessage('Preço do produto é obrigatório!')
+        .isFloat()
+        .withMessage('Preço do produto deve ser número real!'),
+
+    body('user_id')
+        .notEmpty()
+        .withMessage('ID de usuário é obrigatório!')
+        .isInt()
+        .withMessage('ID de usuário deve ser inteiro!'),
+
+    body('ingredients')
+        .optional()
+        .isArray()
+        .withMessage('Os ingredientes deve ser um array de objetos!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo um igrediente!')
+
+];
 
 module.exports = {
-    createAndUpdate
+    create,
+    update
 }

@@ -1,68 +1,68 @@
 const rolesUserRepository = require('../repositories/roles_user.repository');
+const HttpError = require('../classes/HttpError');
 
 const getAll = async () => {
-    const data = await rolesUserRepository.getAll();
-
-    if (data && data.length === 0) {
-        return {
-            message: 'Nenhum Tipo de Usuário foi encontrado!',
-            data: []
-        }
-    }
-
-    return {
-        message: 'Tipos de Usuário encontrados com sucesso!',
-        data: data
-    }
+    return rolesUserRepository.getAll();
 }
 
 const getById = async (roleId) => {
     const data = await rolesUserRepository.getById(roleId);
 
-    return {
-        message: 'Tipo de Usuário encontrado com sucesso!',
-        data: data
-    }
+    if (!data)
+        throw new HttpError('Papel de Usuário inexistente!', 404);
+
+    return data;
 }
 
 const create = async (body) => {
-    const bodyFormatted = formatBody(body);
+    const roleExist = await rolesUserRepository.getByName(body.name.trim());
 
-    const data = await rolesUserRepository.create(bodyFormatted);
+    if (roleExist)
+        throw new HttpError('Já existe um Tipo de Usuário com este nome!', 409);
 
-    return {
-        message: 'Tipo de Usuário cadastrado com sucesso!',
-        data: data
-    }
+    const bodyFormatted = normalizeData(body);
+
+    const newRoleId = await rolesUserRepository.create(bodyFormatted);
+
+    return rolesUserRepository.getById(newRoleId);
 }
 
 const update = async (body, roleId) => {
-    const bodyFormatted = formatBody(body);
+    const roleExist = await rolesUserRepository.getById(roleId);
 
-    const data = await rolesUserRepository.update(bodyFormatted, roleId);
+    if (!roleExist)
+        throw new HttpError('Papel de Usuário inexistente!', 404);
 
-    return {
-        message: 'Tipo de Usuário atualizado com sucesso!',
-        data: data
+    if (body.name) {
+        const roleExistEmail = await rolesUserRepository.getByName(body.name.trim(), roleId);
+
+        if (roleExistEmail)
+            throw new HttpError('Já existe um Papel de Usuário com este nome!', 409);
     }
+
+    const bodyFormatted = normalizeData(body, roleExist);
+
+    await rolesUserRepository.update(bodyFormatted, roleId);
+
+    return rolesUserRepository.getById(roleId);
 }
 
 const remove = async (roleId) => {
-    await rolesUserRepository.remove(roleId);
+    const roleExist = await rolesUserRepository.getById(roleId);
 
-    return {
-        message: 'Tipo de Usuário excluído com sucesso!'
-    }
+    if (!roleExist)
+        throw new HttpError('Papel de Usuário inexistente!', 404);
+
+    rolesUserRepository.remove(roleId);
 }
 
-function formatBody (body) {
-    const roleName = body.name ? body.name.trim() : '';
-    const bodyFormatted = {
-        name: roleName,
-        modules_ids: body.modules_ids ? body.modules_ids : []
+function normalizeData (body, role = null) {
+    return {
+        name: body.name ? body.name.trim() 
+            : role?.name ? role.name : '',
+        modules_ids: body.modules_ids ? body.modules_ids 
+            : role?.modules ? role.modules.map(m => m.id) : []
     }
-
-    return bodyFormatted;
 }
 
 module.exports = {

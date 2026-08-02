@@ -1,9 +1,9 @@
 const { body } = require('express-validator');
 const HttpError = require('../classes/HttpError');
-const validatorMiddleware = require('../middlewares/validator.middleware');
 
 const create = [
     body('name')
+        .trim()
         .notEmpty()
         .withMessage('Nome de usuário é obrigatório!'),
 
@@ -34,6 +34,8 @@ const create = [
     body('roles_ids')
         .notEmpty()
         .withMessage('As permissões de usuário são obrigatórias!')
+        .isArray()
+        .withMessage('As permissões de usuário deve ser um array!')
         .isArray({min: 1})
         .withMessage('Informe pelo uma permissão de usuário'),
 
@@ -46,6 +48,7 @@ const create = [
 const update = [
     body('name')
         .optional()
+        .trim()
         .notEmpty()
         .withMessage('Nome de usuário não pode ser vazio!'),
 
@@ -86,6 +89,8 @@ const update = [
         .optional()
         .notEmpty()
         .withMessage('As permissões de usuário não podem ser vazias!')
+        .isArray()
+        .withMessage('As permissões de usuário deve ser um array!')
         .isArray({min: 1})
         .withMessage('Informe pelo menos 1 ID de permissão de usuário'),
 
