@@ -1,32 +1,30 @@
-const create = async (req, res, next) => {
-    const body = req.body;
+const { body } = require('express-validator');
 
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado!', data: {} });
+const create = [
+    body('name')
+        .trim()
+        .notEmpty()
+        .withMessage('Nome da unidade de medida é obrigatório!'),
 
-    if (!body.name || typeof body.name !== 'string' || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome da Unidade de Medida é obrigatório!', field: 'name', data: {} });
+    body('type')
+        .trim()
+        .notEmpty()
+        .withMessage('Tipo de unidade de medida é obrigatório!'),
+];
 
-    if (!body.type || typeof body.type !== 'string' || body.type.trim() === '')
-        return res.status(400).send({ message: 'Tipo de Unidade de Medida é obrigatório!', field: 'type', data: {} });
+const update = [
+    body('name')
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage('Nome da unidade de medida é obrigatório!'),
 
-    return next();
-}
-
-const update = async (req, res, next) => {
-    const body = req.body;
-
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado!', data: {} });
-
-    if (!body.name || typeof body.name !== 'string' || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome da Unidade de Medida é obrigatório!', field: 'name', data: {} });
-
-    if (!body.type || typeof body.type !== 'string' || body.type.trim() === '')
-        return res.status(400).send({ message: 'Tipo de Unidade de Medida é obrigatório!', field: 'type', data: {} });
-
-    return next();
-}
+    body('type')
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage('Tipo de unidade de medida é obrigatório!'),
+];
 
 module.exports = {
     create,

@@ -1,89 +1,66 @@
 const unitTypesService = require('../services/unit_type.service');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     try {
         const result = await unitTypesService.getAll();
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: result.length > 0 ? 'Unidades de medida encontradas com sucesso!' : 'Nenhuma unidade de medida foi encontrada!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: []
-        });
+        next(err);
     }
 }
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
     try {
-        const unitTypeId = req.params.id;
-
-        const result = await unitTypesService.getById(unitTypeId);
+        const result = await unitTypesService.getById(req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: 'Unidade de medida encontrada com sucesso!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
+        next(err);
     }
 }
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
     try {
-        const body = req.body;
-
-        const result = await unitTypesService.create(body);
+        const result = await unitTypesService.create(req.body);
 
         return res.status(201).send({
-            message: result.message,
-            data: result.data
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
+            message: 'Unidade de medida criada com sucesso!',
+            data: result
         });
+    } catch (err) {
+        next(err);
     }
 }
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
     try {
-        const body = req.body;
-        const params = req.params;
-
-        const result = await unitTypesService.update(body, params.id);
+        const result = await unitTypesService.update(req.body, req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
+            message: 'Unidade de medida atualizada com sucesso!',
+            data: result
         });
+    } catch (err) {
+        next(err);
     }
 }
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
     try {
-        const unitTypeId = req.params.id;
-
-        const result = await unitTypesService.remove(unitTypeId);
+        await unitTypesService.remove(req.params.id);
 
         return res.status(200).send({
-            message: result.message
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
+            message: 'Unidade de medida excluída com sucesso!'
         });
+    } catch (err) {
+        next(err);
     }
 }
 
