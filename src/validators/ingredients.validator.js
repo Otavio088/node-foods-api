@@ -1,18 +1,33 @@
-const createAndUpdate = async (req, res, next) => {
-    const body = req.body;
+const { body } = require('express-validator');
 
-    if (!body || Object.keys(body).length === 0)
-        return res.status(400).send({ message: 'Nenhum dado foi enviado!', data: {} });
+const create = [
+    body('name')
+        .trim()
+        .notEmpty()
+        .withMessage('Nome do ingrediente é obrigatório!'),
 
-    if (!body.name || typeof body.name !== 'string' || body.name.trim() === '')
-        return res.status(400).send({ message: 'Nome do Ingrediente é obrigatório!', field: 'name', data: {} });
+    body('unit_type_id')
+        .notEmpty()
+        .withMessage('Unidade de medida é obrigatória!')
+        .isInt()
+        .withMessage('Unidade de medida deve ser inteiro')
+];
 
-    if (!body.unit_type_id || typeof body.unit_type_id !== 'number')
-        return res.status(400).send({ message: 'Unidade de Medida é obrigatório!', field: 'unit_type_id', data: {} });
+const update = [
+    body('name')
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage('Nome do ingrediente é obrigatório!'),
 
-    return next();
-}
+    body('unit_type_id')
+        .optional()
+        .notEmpty()
+        .withMessage('Unidade de medida é obrigatória!')
+        .isInt()
+];
 
 module.exports = {
-    createAndUpdate
+    create,
+    update
 }

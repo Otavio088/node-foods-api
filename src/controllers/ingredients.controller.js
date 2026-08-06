@@ -1,80 +1,66 @@
 const ingredientsService = require('../services/ingredients.service');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     try {
         const result = await ingredientsService.getAll();
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: result.length > 0 ? 'Ingredientes encontrados com sucesso!' : 'Nenhum ingrediente foi encontrado!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: []
-        });
+        next(err);
     }
 }
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
     try {
         const result = await ingredientsService.getById(req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
+            message: 'Ingrediente encontrado com sucesso!',
+            data: result
         });
     } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
-        });
+        next(err);
     }
 }
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
     try {
         const result = await ingredientsService.create(req.body);
 
         return res.status(201).send({
-            message: result.message,
-            data: result.data
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
+            message: 'Ingrediente criado com sucesso!',
+            data: result
         });
+    } catch (err) {
+        next(err);
     }
 }
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
     try {
         const result = await ingredientsService.update(req.body, req.params.id);
 
         return res.status(200).send({
-            message: result.message,
-            data: result.data
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
-            data: {}
+            message: 'Ingrediente atualizado com sucesso!',
+            data: result
         });
+    } catch (err) {
+        next(err);
     }
 }
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
     try {
-        const result = await ingredientsService.remove(req.params.id);
+        await ingredientsService.remove(req.params.id);
 
         return res.status(200).send({
-            message: result.message
-        })
-    } catch (err) {
-        return res.status(500).send({
-            message: err.message,
+            message: 'Ingrediente excluído com sucesso!'
         });
+    } catch (err) {
+        next(err);
     }
 }
 

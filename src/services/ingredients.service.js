@@ -1,69 +1,81 @@
 const ingredientsRepository = require('../repositories/ingredients.repository');
+const unitTypesRepository = require('../repositories/unit_types.repository');
+const HttpError = require('../classes/HttpError');
 
 const getAll = async () => {
-    const data = await ingredientsRepository.getAll();
-
-    if (data && data.length === 0) {
-        return {
-            message: 'Nenhum Ingrediente foi encontrad!',
-            data: []
-        }
-    }
-
-    return {
-        message: 'Ingredientes encontrados com sucesso!',
-        data: data
-    }
+    return ingredientsRepository.getAll();
 }
 
-const getById = async (id) => {
-    const data = await ingredientsRepository.getById(id);
+const getById = async (ingredientId) => {
+    const data = await ingredientsRepository.getById(ingredientId);
 
-    return {
-        message: 'Ingrediente encontrado com sucesso!',
-        data: data
-    }
+    if (!data)
+        throw new HttpError('Ingrediente inexistente!', 400);
+
+    return data;
 }
 
 const create = async (body) => {
-    const bodyFormatted = formatBody(body);
+    const bodyFormatted = normalizeData(body);
 
-    const data = await ingredientsRepository.create(bodyFormatted);
+    const unitTypeExist = await unitTypesRepository.getById(bodyFormatted.unit_type_id);
 
-    return {
-        message: 'Ingrediente cadastrado com sucesso!',
-        data: data
-    }
+    if (!unitTypeExist)
+        throw new HttpError('Unidade de medida inexistente!', 400);
+
+    const ingredientExist = await ingredientsRepository.getByName(bodyFormatted.name);
+
+    if (ingredientExist)
+        throw new HttpError('Já existe um ingrediente com este nome', 409);
+
+    const newIngredient = await ingredientsRepository.create(bodyFormatted);
+
+    return ingredientsRepository.getById(newIngredient.id);
 }
 
-const update = async (body, id) => {
-    const bodyFormatted = formatBody(body);
+const update = async (body, ingredientId) => {
+    const ingredientExist = await ingredientsRepository.getById(ingredientId);
 
-    const data = await ingredientsRepository.update(bodyFormatted, id);
+    if (!ingredientExist)
+        throw new HttpError('Ingrediente inexistente!', 400);
 
-    return {
-        message: 'Ingrediente atualizado com sucesso!',
-        data: data
+    if (body.name) {
+        const ingredientNameExist = await ingredientsRepository.getByName(body.name.trim(), ingredientId);
+
+        if (ingredientNameExist)
+            throw new HttpError('Já existe um ingrediente com este nome', 409);
     }
+
+    if (body.unit_type_id) {
+        const unitTypeExist = await unitTypesRepository.getById(body.unit_type_id);
+
+        if (!unitTypeExist)
+            throw new HttpError('Unidade de medida inexistente!', 400);
+    }
+
+    const bodyFormatted = normalizeData(body, ingredientExist);
+
+    await ingredientsRepository.update(bodyFormatted, ingredientId);
+
+    return ingredientsRepository.getById(ingredientId);
 }
 
-const remove = async (id) => {
-    await ingredientsRepository.remove(id);
+const remove = async (ingredientId) => {
+    const ingredientExist = await ingredientsRepository.getById(ingredientId);
 
-    return {
-        message: 'Ingrediente excluído com sucesso!'
-    }
+    if (!ingredientExist)
+        throw new HttpError('Ingrediente inexistente!', 400);
+
+    await ingredientsRepository.remove(ingredientId);
 }
 
-function formatBody (body) {
-    const ingredientName = body.name.trim();
-
-    const bodyFormatted = {
-        name: ingredientName,
-        unit_type_id: body.unit_type_id
-    }
-
-    return bodyFormatted;
+function normalizeData (body, ingredient = null) {
+    return {
+        name: body.name ? body.name.trim() 
+            : ingredient?.name ? ingredient.name : '',
+        unit_type_id: body.unit_type_id ? body.unit_type_id 
+            : ingredient?.unit_type?.id ? ingredient?.unit_type?.id : null
+    };
 }
 
 module.exports = {

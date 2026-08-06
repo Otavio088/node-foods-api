@@ -2,96 +2,55 @@ const Ingredients = require ('../models/Ingredients');
 const UnitTypes = require('../models/UnitTypes');
 
 const getAll = async () => {
-    return await Ingredients.query()
+    return Ingredients.query()
         .select('id', 'name', 'created_at', 'updated_at')
         .whereNull('deleted_at')
         .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 }
 
-const getById = async (id) => {
-    const ingredient = await Ingredients.query()
+const getById = async (ingredientId) => {
+    return Ingredients.query()
         .select('id', 'name', 'created_at', 'updated_at')
-        .findById(id)
+        .findById(ingredientId)
         .whereNull('deleted_at')
         .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
+}
 
+const getByName = async (ingredientName, ingredientId = null) => {
+    const query = Ingredients.query()
+        .select('id')
+        .findOne({
+            name: ingredientName,
+            deleted_at: null
+        });
 
-    if (!ingredient)
-        throw new Error('Ingrediente inexistente!');
+    if (ingredientId)
+        query.whereNot('id', ingredientId);
 
-    return ingredient;
+    return query;
 }
 
 const create = async (body) => {
-    const unitType = await UnitTypes.query()
-        .select('id')
-        .findOne({
-            id: body.unit_type_id,
-            deleted_at: null
-        });
-
-    if (!unitType)
-        throw new Error('Unidade de Medida inexistente!');
-
-    const newIngredient = await Ingredients.query()
+    return Ingredients.query()
         .insert(body);
-
-    return await Ingredients.query()
-        .select('id', 'name', 'created_at', 'updated_at')
-        .findById(newIngredient.id)
-        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
 }
 
-const update = async (body, id) => {
-    const unitType = await UnitTypes.query()
-        .select('id')
-        .findOne({
-            id: body.unit_type_id,
-            deleted_at: null
-        });
-
-    if (!unitType)
-        throw new Error('Unidade de Medida inexistente!');
-
-    const ingredient = await Ingredients.query()
-        .select('id')
-        .findOne({
-            id: id,
-            deleted_at: null
-        });
-
-    if (!ingredient)
-        throw new Error('Ingrediente inexistente!');
-
+const update = async (body, ingredientId) => {
     await Ingredients.query()
         .patch(body)
-        .where('id', ingredient.id);
-
-    return Ingredients.query()
-        .select('id', 'name', 'created_at', 'updated_at')
-        .findById(ingredient.id)
-        .withGraphFetched('unit_type(defaultSelectsUnitTypes)');
+        .where('id', ingredientId);
 }
 
-const remove = async (id) => {
-    const existIngredient = await Ingredients.query()
-        .select('id')
-        .findById(id)
-        .whereNull('deleted_at');
-
-    if (!existIngredient)
-        throw new Error('Ingrediente inexistente!');
-
+const remove = async (ingredientId) => {
     await Ingredients.query()
-        .patch({
-            deleted_at: new Date()
-        })
-        .where('id', existIngredient.id);
+        .patch({ deleted_at: new Date() })
+        .where('id', ingredientId);
 }
 
 module.exports = {
     getAll,
     getById,
+    getByName,
     create,
     update,
     remove
