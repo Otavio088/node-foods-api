@@ -1,5 +1,6 @@
 const HttpError = require('../classes/HttpError');
 const productsRepository = require('../repositories/products.repository');
+const productCategoriesRepository = require('../repositories/product_categories.repository');
 
 const getAll = async () => {
     return productsRepository.getAll();
@@ -17,6 +18,10 @@ const getById = async (productId) => {
 const create = async (body) => {
     const bodyFormatted = normalizeData(body);
 
+    const categories = await productCategoriesRepository.getByCodes(bodyFormatted.categories);
+
+    bodyFormatted.categories = categories.map(c => c.id);
+
     const newProductId = await productsRepository.create(bodyFormatted);
 
     return productsRepository.getById(newProductId);
@@ -30,9 +35,13 @@ const update = async (body, productId) => {
 
     const bodyFormatted = normalizeData(body, productExist);
 
+    const categories = await productCategoriesRepository.getByCodes(bodyFormatted.categories);
+
+    bodyFormatted.categories = categories.map(c => c.id);
+
     await productsRepository.update(bodyFormatted, productId);
 
-    return await productsRepository.getById(productId);
+    return productsRepository.getById(productId);
 }
 
 const remove = async (productId) => {
@@ -44,7 +53,7 @@ const remove = async (productId) => {
     productsRepository.remove(productId);
 }
 
-function normalizeData (body, product = null) {
+function normalizeData(body, product = null) {
     return {
         name: body.name ? body.name.trim() 
             : product?.name ? product.name : '',
@@ -71,7 +80,9 @@ function normalizeData (body, product = null) {
                 });
             return acc;
         }, []) : [],
-
+        categories: body.categories ? body.categories.map(c => c.trim())
+            : product?.categories ? product.categories.map(c => c.trim())
+            : []
     }
 }
 

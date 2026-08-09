@@ -23,8 +23,14 @@ const create = [
         .isArray()
         .withMessage('Os ingredientes deve ser um array de objetos!')
         .isArray({min: 1})
-        .withMessage('Informe pelo um igrediente!')
+        .withMessage('Informe pelo menos um igrediente!'),
 
+    body('categories')
+        .optional()
+        .isArray()
+        .withMessage('As categorias deve ser um array!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo menos uma categoria')
 ];
 
 const update = [
@@ -52,8 +58,14 @@ const update = [
         .isArray()
         .withMessage('Os ingredientes deve ser um array de objetos!')
         .isArray({min: 1})
-        .withMessage('Informe pelo um igrediente!')
+        .withMessage('Informe pelo menos um igrediente!'),
 
+    body('categories')
+        .optional()
+        .isArray()
+        .withMessage('As categorias deve ser um array!')
+        .isArray({min: 1})
+        .withMessage('Informe pelo menos uma categoria')
 ];
 
 module.exports = {

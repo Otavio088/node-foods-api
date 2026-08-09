@@ -54,7 +54,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
     try {
-        const result = await usersService.remove(req.params.id);
+        await usersService.remove(req.params.id);
 
         return res.status(200).send({
             message: 'Usuário removido com sucesso!'
