@@ -1,6 +1,6 @@
 # NodeFoodsAPI 🍔
 
-- Node 24.14.0
+- Node 24.18.0
 
 - https://nodejs.org/en/download
 

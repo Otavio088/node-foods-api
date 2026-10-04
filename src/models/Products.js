@@ -45,6 +45,12 @@ class Products extends Model {
             }
         }
     }
+
+    static modifiers = {
+        defaultSelectsProducts(query) {
+            query.select('id', 'name', 'description');
+        }
+    }
 }
 
 module.exports = Products;

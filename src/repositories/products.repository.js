@@ -18,6 +18,13 @@ const getById = async (productId) => {
         .withGraphFetched('[ingredients(defaultSelectsIngredients).unit_type(defaultSelectsUnitTypes), categories(defaultSelectsCategory), user(defaultSelectsUser)]');
 }
 
+const getByIds = async (ids) => {
+    return Products.query()
+        .select('id', 'price')
+        .whereIn('id', ids)
+        .whereNull('deleted_at');
+}
+
 const create = async (body) => {
     let product;
 
@@ -208,6 +215,7 @@ const remove = async (productId) => {
 module.exports = {
     getAll,
     getById,
+    getByIds,
     create,
     update,
     remove
